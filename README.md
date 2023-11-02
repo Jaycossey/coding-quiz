@@ -7,9 +7,6 @@ This project was made to utilise API's, Timers, and different OOP methods within
 - Planning stage
 - Create visual layout
 - Create functional layout
-- Add timer
-- Add API links
-- Separate into components
 - Ensure functions still function
 - Bug fixes
 

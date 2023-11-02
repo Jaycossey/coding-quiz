@@ -4,6 +4,11 @@ const startButton = document.getElementById('startButton');
 const timerEl = document.getElementById('time');
 const questionContainer = document.getElementById('questionEl')
 
+// penalty for wrong answer
+const penalty = 5;
+// score
+let score = 0;
+
 // timer max
 let timeRemaining = 75;
 
@@ -66,9 +71,6 @@ function startTimer() {
  * iterating through the question array. 
  */
 
-function calculateScore() {
-    console.log("Score: ");
-}
 
 // function to handle bool values
 function boolQuestion(count) {
@@ -81,13 +83,21 @@ function boolQuestion(count) {
     // create new P element to contain the question text
     let newPEl = document.createElement('p');
     newPEl.className = "boolQuestionText";
+    newPEl.textContent = questionSet[count].question;
 
     // create true and false buttons
     let trueButton = document.createElement('button');
     trueButton.className = "boolTrue";
+    trueButton.innerText = "true";
 
     let falseButton = document.createElement('button');
     falseButton.className = "boolFalse";
+    falseButton.innerText = "false";
+
+    console.log(newDiv);
+    console.log(newPEl);
+    console.log(trueButton);
+    console.log(falseButton);
 
     /**
      * append div to body, appendChild to newDiv
@@ -120,7 +130,6 @@ function questionTime(count) {
 
     // calculate score depending on whether user has beaten timer
     if (questionCount >= 30) {
-        calculateScore();
         return;
     }
 
