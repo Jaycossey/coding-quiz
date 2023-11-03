@@ -2,7 +2,8 @@
 // element references
 const startButton = document.getElementById('startButton');
 const timerEl = document.getElementById('time');
-const questionContainer = document.getElementById('questionEl')
+const questionContainer = document.getElementById('questionEl');
+const currentScoreContainer = document.getElementById('score');
 
 // penalty for wrong answer
 const penalty = 5;
@@ -72,26 +73,27 @@ function startTimer() {
  */
 
 // function to remove current question once answer is clicked
-function removeCurrent() {
-    console.log("Remove Element");
-    // let child = document.querySelector('.boolQuestionContainer');
-    // questionContainer.remove(child);
+function removeCurrent(element) {
+    // console.log("Remove Element");
+    questionContainer.remove(element);
+    questionTime(questionCount);
+    return;
 }
 
 // check answers
-function checkAnswer(value, count) {
+function checkAnswer(value, count, element) {
     if (value == questionSet[count].correct_answer) {
         score++;
+        currentScoreContainer.textContent = score;
         console.log("Correct");
         questionCount++;
-        removeCurrent();
-        questionTime(questionCount);
+        removeCurrent(element);
     } else {
         console.log("incorrect");
         score--;
+        currentScoreContainer.textContent = score;
         questionCount++;
-        removeCurrent();
-        questionTime(questionCount);
+        removeCurrent(element);
     }
 }
 
@@ -130,7 +132,13 @@ function boolQuestion(count) {
 // function to handle random arrangement of answers
 function assignSortedAnswers(i) {
     // assign answers to array !IMPORTANT - if multi choice has > 4 answers, this code WILL break. 
-    let randomAnswerArray = [questionSet[i].correct_answer, questionSet[i].incorrect_answers[0], questionSet[i].incorrect_answers[1], questionSet[i].incorrect_answers[2]];
+    let randomAnswerArray = [questionSet[i].correct_answer];
+
+    // not all multi choice had same incorrect answer amount, this will dynamically produce those answers
+    // rather than assigning undefined.
+    for (let i = 0; i < questionSet[i].incorrect_answers.length; i++) {
+        randomAnswerArray.push(questionSet[i].incorrect_answers[i]);
+    }
     // return sorted answers array
     return randomAnswerArray.sort();
 }
@@ -154,7 +162,7 @@ function multiQuestion(count) {
     // array to store buttons for each answer
     let buttonArray = [];
     // loop through answers 
-    for (let i = 0; i <= answerArray.length; i++) {
+    for (let i = 0; i < answerArray.length; i++) {
         // create button for each answer and assign
         let newButton = document.createElement('button');
         newButton.className = "multi-answer";
@@ -169,8 +177,13 @@ function multiQuestion(count) {
 }
 
 // manage and add click events to elements
-function manageClickEvents(elements) {
-    console.log("Add clicks");
+function manageClickEvents(element) {
+    console.log(element);
+
+    element.addEventListener('click', function(event) {
+        console.log(event);
+        checkAnswer(event.target.innerText, questionCount, element);
+    });
 }
 
 // function to begin quiz, handles question type and calls respective funcitons
@@ -186,12 +199,10 @@ function questionTime(count) {
         const boolQuEl = boolQuestion(count);
         questionContainer.appendChild(boolQuEl);
         manageClickEvents(boolQuEl);
-        return;
     } else {
         // create multiple choice
         const multiQuEl = multiQuestion(count);
         questionContainer.appendChild(multiQuEl);
         manageClickEvents(multiQuEl);
-        return;
     }
 }
