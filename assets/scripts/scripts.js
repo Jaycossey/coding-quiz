@@ -53,7 +53,7 @@ function startTimer() {
     startButton.removeEventListener('click', startTimer);
 
     // start question display
-    questionTime(0);
+    questionTime(questionCount);
     // loop for 75 seconds with timeout 
     for (let i = 0; i <= timeRemaining; i++) {
         setTimeout(() => {
@@ -71,11 +71,34 @@ function startTimer() {
  * iterating through the question array. 
  */
 
+// function to remove current question once answer is clicked
+function removeCurrent() {
+    console.log("Remove Element");
+    // let child = document.querySelector('.boolQuestionContainer');
+    // questionContainer.remove(child);
+}
+
+// check answers
+function checkAnswer(value, count) {
+    if (value == questionSet[count].correct_answer) {
+        score++;
+        console.log("Correct");
+        questionCount++;
+        removeCurrent();
+        questionTime(questionCount);
+    } else {
+        console.log("incorrect");
+        score--;
+        questionCount++;
+        removeCurrent();
+        questionTime(questionCount);
+    }
+}
+
 
 // function to handle bool values
 function boolQuestion(count) {
     // All elements created with className to enable reusable styling.
-    console.log("This is a bool question function");
     // create new Div to contain the bool questions
     let newDiv = document.createElement('div');
     newDiv.className = "booleanQuestionContainer";
@@ -85,60 +108,90 @@ function boolQuestion(count) {
     newPEl.className = "boolQuestionText";
     newPEl.textContent = questionSet[count].question;
 
-    // create true and false buttons
+    // create true buttons
     let trueButton = document.createElement('button');
     trueButton.className = "boolTrue";
     trueButton.innerText = "true";
 
+    // create false button
     let falseButton = document.createElement('button');
     falseButton.className = "boolFalse";
     falseButton.innerText = "false";
 
-    console.log(newDiv);
-    console.log(newPEl);
-    console.log(trueButton);
-    console.log(falseButton);
+    // append children to parent div
+    newDiv.appendChild(newPEl);
+    newDiv.appendChild(trueButton);
+    newDiv.appendChild(falseButton);
 
-    /**
-     * append div to body, appendChild to newDiv
-     * All "button" elements need click event listener
-     * value of those buttons should be bool values
-     * onclick = if value === questionSet[count].correct_answer
-     * score++;
-     * count++;
-     * 
-     * else 
-     * timer--;
-     * count++;
-     * questionTime(questionCount)
-     * 
-     * 
-     */
+    return newDiv;
+
 }
+
+// function to handle random arrangement of answers
+function assignSortedAnswers(i) {
+    // assign answers to array !IMPORTANT - if multi choice has > 4 answers, this code WILL break. 
+    let randomAnswerArray = [questionSet[i].correct_answer, questionSet[i].incorrect_answers[0], questionSet[i].incorrect_answers[1], questionSet[i].incorrect_answers[2]];
+    // return sorted answers array
+    return randomAnswerArray.sort();
+}
+
 
 // function to handle multiple choice
 function multiQuestion(count) {
-    console.log("this is multi function");
+    // create div container for question
+    let newDiv = document.createElement('div');
+    newDiv.className = "multiQuestionContainer";
+
+    // create question p element and append
+    let newPEl = document.createElement('p');
+    newPEl.className = "multiQuestionText";
+    newPEl.innerText = questionSet[count].question;
+    newDiv.appendChild(newPEl);
+
+    // sorted answers by alpha
+    let answerArray = assignSortedAnswers(count);
+
+    // array to store buttons for each answer
+    let buttonArray = [];
+    // loop through answers 
+    for (let i = 0; i <= answerArray.length; i++) {
+        // create button for each answer and assign
+        let newButton = document.createElement('button');
+        newButton.className = "multi-answer";
+        newButton.innerText = answerArray[i];
+        // store in button array
+        buttonArray.push(newButton);
+        // append to parent div
+        newDiv.appendChild(newButton);
+    }
+
+    return newDiv;
+}
+
+// manage and add click events to elements
+function manageClickEvents(elements) {
+    console.log("Add clicks");
 }
 
 // function to begin quiz, handles question type and calls respective funcitons
-// takes "question number" as arg to handle array loops
 function questionTime(count) {
-    // now I can access the data (Thankyou Gurjeet!), I can manipulate that and create 
-    // a set of functions to handle the questions and answers.
-    console.log(questionSet[count].question);
-
     // calculate score depending on whether user has beaten timer
     if (questionCount >= 30) {
         return;
     }
 
     // if/else to handle question types.
-    // bool / multichoice
     if (questionSet[count].type === 'boolean') {
-        boolQuestion(count);
+        // Create bool question and append
+        const boolQuEl = boolQuestion(count);
+        questionContainer.appendChild(boolQuEl);
+        manageClickEvents(boolQuEl);
+        return;
     } else {
-        multiQuestion(count);
+        // create multiple choice
+        const multiQuEl = multiQuestion(count);
+        questionContainer.appendChild(multiQuEl);
+        manageClickEvents(multiQuEl);
+        return;
     }
-
 }
