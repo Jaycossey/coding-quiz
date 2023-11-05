@@ -40,12 +40,22 @@ async function fetchQuestions() {
 // Bugfix, couldn't target data until correctly parsed
 fetchQuestions().then((data) => {
     questionSet = data;
+    console.log(questionSet);
 });
-
 
 // HIGHSCORE FUNCTIONS -------------------------------------------------------
 let scoreList = [];
 
+// function to update scores List with existing data
+function updateScores() {
+    // set temp current scorelist
+    let currentScore = JSON.parse(localStorage.getItem("scores"));
+    // push each existing to scoreList array
+    currentScore.forEach((item) => {
+        scoreList.push(item);
+    });
+    return;
+}
 
 // constructor for scorelist objects
 class HighScoreItem {
@@ -58,14 +68,8 @@ class HighScoreItem {
 
 // assign scores to local storage
 function assignScores(userName) {
-    // ensure that the locally stored array is added to the scoreList array
-    // slight syntax error in the array, this will always init the 0th index as the full prior array of objects
-    // need to correct the layout of this array to ensure that I add each object separately
-    // create an array to store each object? 
-    // how do I loop through the items in the objects?
-    // more correctly how do I separate those objects rather than adding them all into one array index?
-    scoreList.push(JSON.parse(localStorage.getItem("scores")));
-    // create new score and assign values
+    updateScores();
+    // create new score list item with current user and score
     const newScore = new HighScoreItem(userName, score);
     scoreList.push(newScore);
     // store object in local storage with username as key
@@ -118,7 +122,7 @@ function startTimer() {
         setTimeout(() => {
             // set inner text as countdown
             timerEl.innerText = timeRemaining - i;
-        }, 100 * i);
+        }, 10 * i);
     }
 }
 
