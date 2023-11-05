@@ -19,7 +19,6 @@ let questionCount = 0;
 // empty array to store question objects
 let questionSet = [];
 
-
 // API CALL AND STORAGE ------------------------------------------------------
 
 // async fetch 30 quetions from API 
@@ -32,7 +31,7 @@ async function fetchQuestions() {
     const questions = await response.json();
     // once results have been stored, add event listener to button
     startButton.addEventListener('click', startTimer);
-    console.log(questions.results);
+    // console.log(questions.results);
 
     return questions.results;
 }
@@ -41,7 +40,70 @@ async function fetchQuestions() {
 // Bugfix, couldn't target data until correctly parsed
 fetchQuestions().then((data) => {
     questionSet = data;
+    console.log(questionSet);
 });
+
+// HIGHSCORE FUNCTIONS -------------------------------------------------------
+let scoreList = [];
+
+// function to update scores List with existing data
+function updateScores() {
+    // set temp current scorelist
+    let currentScore = JSON.parse(localStorage.getItem("scores"));
+    // push each existing to scoreList array
+    currentScore.forEach((item) => {
+        scoreList.push(item);
+    });
+    return;
+}
+
+// constructor for scorelist objects
+class HighScoreItem {
+    // object to be stored takes username and score
+    constructor(userName, userScore) {
+        this.userName = userName;
+        this.score = userScore;
+    }
+}
+
+// assign scores to local storage
+function assignScores(userName) {
+    updateScores();
+    // create new score list item with current user and score
+    const newScore = new HighScoreItem(userName, score);
+    scoreList.push(newScore);
+    // store object in local storage with username as key
+    localStorage.setItem("scores", JSON.stringify(scoreList));
+}
+
+// end of quiz handler
+function scorePrompt() {
+    // create input and instruction for user to save high score
+    const promptDiv = document.createElement('div');
+    const userNameInst = document.createElement('p');
+    const userNamePrompt = document.createElement('input');
+
+    // detail prompt text and intial value
+    userNameInst.innerText = "Input your initials";
+    userNamePrompt.placeholder = "eg: ABC";
+    userNamePrompt.value = "";
+
+    // append elements to parent div
+    promptDiv.appendChild(userNameInst);
+    promptDiv.appendChild(userNamePrompt);
+
+    // onsubmit event listener to assign score
+    userNamePrompt.addEventListener("keypress", function(event) {
+        if (event.key == 'Enter') {
+            assignScores(userNamePrompt.value);
+            // remove current doesnt remove the div from screen, hotfix required -----------------------------
+            removeCurrent(promptDiv);
+        }
+    });
+
+    // append the prompts to the container to display on screen
+    questionContainer.append(promptDiv);
+}
 
 
 // TIMER FUNCTIONS -----------------------------------------------------------
@@ -60,10 +122,10 @@ function startTimer() {
         setTimeout(() => {
             // set inner text as countdown
             timerEl.innerText = timeRemaining - i;
-            // MUST remember to change this timeout to 1000 * i before deployment-------------------------!!
-        }, 100 * i);
+        }, 10 * i);
     }
 }
+
 
 // QUESTION DOM MANIPULATION ------------------------------------------------
 
@@ -71,22 +133,43 @@ function startTimer() {
 function removeCurrent(element) {
     // console.log("Remove Element");
     questionContainer.removeChild(element);
-    questionTime(questionCount);
-    return;
+    
+    // ensure that the timer hasn't reached 0 before generating next question
+    if (timerEl.innerText <= 0) {
+        scorePrompt();
+        return;
+    } else {
+        // generate next question
+        questionTime(questionCount);
+        return;
+    }
 }
 
 // check answers
 function checkAnswer(value, count, element) {
+    // if correct answer
     if (value == questionSet[count].correct_answer) {
+        // add 1 to score, set score to screen
         score++;
         currentScoreContainer.textContent = score;
+        // iterate to next question and remove current question
         questionCount++;
         removeCurrent(element);
     } else {
-        score--;
-        currentScoreContainer.textContent = score;
-        questionCount++;
-        removeCurrent(element);
+        // add conditional to prevent below 0 score
+        if (score <= 0) {
+            currentScoreContainer.textContent = score;
+            questionCount++;
+            removeCurrent(element);
+        } else {
+            // score -- on incorrect answer and above 1 point
+            score--;
+            // as above, update score display and iterate question
+            currentScoreContainer.textContent = score;
+            questionCount++;
+            removeCurrent(element);
+        }
+        
     }
 }
 
@@ -124,13 +207,13 @@ function boolQuestion(count) {
 
 // function to handle random arrangement of answers
 function assignSortedAnswers(count) {
-    // assign answers to array !IMPORTANT - if multi choice has > 4 answers, this code WILL break. 
+    // assign correct answers to declared array
     let randomAnswerArray = [];
-
     randomAnswerArray.push(questionSet[count].correct_answer);
 
     // not all multi choice had same incorrect answer amount, this will dynamically produce those answers
-    // rather than assigning undefined.
+    // rather than assigning undefined. -- Realistically I could have also dynamically created
+    // elements in the same way, oversight on my part can fix at later date if needed - not urgent
     for (let i = 0; i < questionSet[count].incorrect_answers.length; i++) {
         randomAnswerArray.push(questionSet[count].incorrect_answers[i]);
     }
@@ -173,10 +256,10 @@ function multiQuestion(count) {
 
 // manage and add click events to elements
 function manageClickEvents(element) {
-    console.log(element);
+    // console.log(element);
 
     element.addEventListener('click', function(event) {
-        console.log(event);
+        // console.log(event);
         checkAnswer(event.target.innerText, questionCount, element);
     });
 }
@@ -201,37 +284,3 @@ function questionTime(count) {
         manageClickEvents(multiQuEl);
     }
 }
-
-/**
- * CURRENT BUGS!!
- * 
- * When the quiz loads, the first question renders and deletes correctly,
- * as the second question renders, then the answers are scrambled. Showing 
- * answers from previous iterations
- * 
- * potential and likelyhood of problem source:
- * 
- * - On questionTime(count) call - when removeCurrent is calling this, is it actually removing the 
- *          element from the stack? 
- * - When assignRandomAnswers is called - is this function removing the elements from screen or DOM?
- * 
- * - Within questionTime - I need to track and console.log all potential errors for this bug. at all points.
- *          - utilise breakpoints where I can to help ease the debugging
- * 
- * - ChatGPT? - HA! next joke
- * 
- * - the api is called once per window load, generating 20 questions and answers for those on CS topics
- * - the api data is stored and called/referenced correctly 
- * 
- * - The issue is the button elements, I need to look at the values within.
- * 
- * - so first question was bool type on this specific test: 
- * 
- *      correct button generation on first iteration
- *      incorrect on second, console.log isnt showing children on either of these 2
- * 
- *      3rd iteration was correct generation
- *      4th iteration shows button children exist but only 3/4 
- *              this iteration's button text content is also incorrect for the input. ergo - potential issue is that the generate answer functions
- *              for multi choice is incorrect. why? THE LOOP!!!!! the loop uses i but at the same time I am using i for the count (knew I was wrong with that)
- */
