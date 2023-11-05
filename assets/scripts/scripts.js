@@ -19,7 +19,6 @@ let questionCount = 0;
 // empty array to store question objects
 let questionSet = [];
 
-
 // API CALL AND STORAGE ------------------------------------------------------
 
 // async fetch 30 quetions from API 
@@ -46,10 +45,20 @@ fetchQuestions().then((data) => {
 
 // HIGHSCORE FUNCTIONS -------------------------------------------------------
 
+// constructor for scorelist objects
+class HighScoreItem {
+    constructor(userName, userScore) {
+        this.userName = userName;
+        this.score = userScore;
+    }
+}
+
 // assign scores to local storage
 function assignScores(userName) {
-    localStorage.setItem("userName", userName);
-    localStorage.setItem("score", score);
+    const newScore = new HighScoreItem();
+    newScore.userName = userName;
+    newScore.score = score;
+    localStorage.setItem(userName, JSON.stringify(newScore));
 }
 
 // end of quiz handler
@@ -67,14 +76,7 @@ function scorePrompt() {
     // append elements to parent div
     promptDiv.appendChild(userNameInst);
     promptDiv.appendChild(userNamePrompt);
-    
-    // assign on submit function. this is currently a bug, needs reworking.
-    // submit is currently the default action when this function is called
-    // need to change how I approach this. event listener would be a good shout
-    // ----------------------------------------------------------------- 
-    // userNamePrompt.onsubmit = localStorage.setItem("userName", userNamePrompt.value);
-    // userNamePrompt.onsubmit = localStorage.setItem("highScore", score);
-    
+
     // onsubmit event listener to assign score
     userNamePrompt.addEventListener("keypress", function(event) {
         if (event.key == 'Enter') {
@@ -82,13 +84,9 @@ function scorePrompt() {
             removeCurrent(promptDiv);
         }
     });
-    // assignScores(event.target.value);
-    // removeCurrent(promptDiv);
 
     // append the prompts to the container to display on screen
     questionContainer.append(promptDiv);
-
-
 }
 
 

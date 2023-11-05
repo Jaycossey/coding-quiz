@@ -1,0 +1,1 @@
+// console.log(localStorage.getItem(JSON.parse(asd.value)));
