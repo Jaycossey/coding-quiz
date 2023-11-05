@@ -44,9 +44,12 @@ fetchQuestions().then((data) => {
 
 
 // HIGHSCORE FUNCTIONS -------------------------------------------------------
+let scoreList = [];
+
 
 // constructor for scorelist objects
 class HighScoreItem {
+    // object to be stored takes username and score
     constructor(userName, userScore) {
         this.userName = userName;
         this.score = userScore;
@@ -55,10 +58,18 @@ class HighScoreItem {
 
 // assign scores to local storage
 function assignScores(userName) {
-    const newScore = new HighScoreItem();
-    newScore.userName = userName;
-    newScore.score = score;
-    localStorage.setItem(userName, JSON.stringify(newScore));
+    // ensure that the locally stored array is added to the scoreList array
+    // slight syntax error in the array, this will always init the 0th index as the full prior array of objects
+    // need to correct the layout of this array to ensure that I add each object separately
+    // create an array to store each object? 
+    // how do I loop through the items in the objects?
+    // more correctly how do I separate those objects rather than adding them all into one array index?
+    scoreList.push(JSON.parse(localStorage.getItem("scores")));
+    // create new score and assign values
+    const newScore = new HighScoreItem(userName, score);
+    scoreList.push(newScore);
+    // store object in local storage with username as key
+    localStorage.setItem("scores", JSON.stringify(scoreList));
 }
 
 // end of quiz handler
@@ -81,6 +92,7 @@ function scorePrompt() {
     userNamePrompt.addEventListener("keypress", function(event) {
         if (event.key == 'Enter') {
             assignScores(userNamePrompt.value);
+            // remove current doesnt remove the div from screen, hotfix required -----------------------------
             removeCurrent(promptDiv);
         }
     });
