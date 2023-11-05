@@ -21,6 +21,15 @@ let questionSet = [];
 
 // API CALL AND STORAGE ------------------------------------------------------
 
+// function to correct charCode in strings within the question objects
+function convertToStringFromCharCode(objectArray) {
+    objectArray.forEach((object) => {
+        String(object.question);
+        String(object.correct_answer);
+        String(object.incorrect_answers);
+    })
+}
+
 // async fetch 30 quetions from API 
 async function fetchQuestions() {
     // API url
@@ -40,8 +49,9 @@ async function fetchQuestions() {
 // Bugfix, couldn't target data until correctly parsed
 fetchQuestions().then((data) => {
     questionSet = data;
-    console.log(questionSet);
+    convertToStringFromCharCode(questionSet);
 });
+
 
 // HIGHSCORE FUNCTIONS -------------------------------------------------------
 let scoreList = [];
@@ -122,7 +132,7 @@ function startTimer() {
         setTimeout(() => {
             // set inner text as countdown
             timerEl.innerText = timeRemaining - i;
-        }, 10 * i);
+        }, 1000 * i);
     }
 }
 
@@ -204,6 +214,22 @@ function boolQuestion(count) {
     return newDiv;
 
 }
+
+/**
+ * BUGFIX!!!! 
+ * So when assigning the answers to the buttons, if the character needed is a special character 
+ * the ascii value is produced instead: string looks like this &quot; &#039; etc.
+ * 
+ * I need to loop through the string and look for these character sequences, then convert from 
+ * ASCII to what the user would expect.
+ * 
+ * Where to call this new function though? probably best to do this before the quiz starts to 
+ * ensure no delays on question generation.
+ * 
+ * so before anything starts, I need to ensure that the information is stored correctly within 
+ * the objects
+ *  
+ */
 
 // function to handle random arrangement of answers
 function assignSortedAnswers(count) {
