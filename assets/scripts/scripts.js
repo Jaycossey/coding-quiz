@@ -19,16 +19,8 @@ let questionCount = 0;
 // empty array to store question objects
 let questionSet = [];
 
-// API CALL AND STORAGE ------------------------------------------------------
 
-// function to correct charCode in strings within the question objects
-function convertToStringFromCharCode(objectArray) {
-    objectArray.forEach((object) => {
-        String(object.question);
-        String(object.correct_answer);
-        String(object.incorrect_answers);
-    })
-}
+// API CALL AND STORAGE ------------------------------------------------------
 
 // async fetch 30 quetions from API 
 async function fetchQuestions() {
@@ -49,7 +41,6 @@ async function fetchQuestions() {
 // Bugfix, couldn't target data until correctly parsed
 fetchQuestions().then((data) => {
     questionSet = data;
-    convertToStringFromCharCode(questionSet);
 });
 
 
@@ -60,12 +51,16 @@ let scoreList = [];
 function updateScores() {
     // set temp current scorelist
     let currentScore = JSON.parse(localStorage.getItem("scores"));
+    // return if local storage doesnt exist
+    if (currentScore === null) return;
+
     // push each existing to scoreList array
     currentScore.forEach((item) => {
         scoreList.push(item);
     });
     return;
 }
+
 
 // constructor for scorelist objects
 class HighScoreItem {
@@ -84,6 +79,7 @@ function assignScores(userName) {
     scoreList.push(newScore);
     // store object in local storage with username as key
     localStorage.setItem("scores", JSON.stringify(scoreList));
+    return;
 }
 
 // end of quiz handler
@@ -97,6 +93,8 @@ function scorePrompt() {
     userNameInst.innerText = "Input your initials";
     userNamePrompt.placeholder = "eg: ABC";
     userNamePrompt.value = "";
+    userNamePrompt.className = "inputInit";
+    userNamePrompt.id = "inputInitials";
 
     // append elements to parent div
     promptDiv.appendChild(userNameInst);
@@ -106,8 +104,8 @@ function scorePrompt() {
     userNamePrompt.addEventListener("keypress", function(event) {
         if (event.key == 'Enter') {
             assignScores(userNamePrompt.value);
-            // remove current doesnt remove the div from screen, hotfix required -----------------------------
-            removeCurrent(promptDiv);
+            questionContainer.removeChild(promptDiv);
+            startButton.style.visibility = "visible";
         }
     });
 
@@ -123,7 +121,7 @@ function startTimer() {
     // set timer to default 
     timerEl.innerText = timeRemaining;
     // remove event listener to prevent double clicks and function calls
-    startButton.removeEventListener('click', startTimer);
+    startButton.style.visibility = "hidden";
 
     // start question display
     questionTime(questionCount);
@@ -134,6 +132,7 @@ function startTimer() {
             timerEl.innerText = timeRemaining - i;
         }, 1000 * i);
     }
+    
 }
 
 
@@ -189,22 +188,22 @@ function boolQuestion(count) {
     // All elements created with className to enable reusable styling.
     // create new Div to contain the bool questions
     let newDiv = document.createElement('div');
-    newDiv.className = "booleanQuestionContainer";
+    newDiv.className = "questionContainer";
     
     // create new P element to contain the question text
     let newPEl = document.createElement('p');
-    newPEl.className = "boolQuestionText";
-    newPEl.textContent = questionSet[count].question;
+    newPEl.className = "questionText";
+    newPEl.innerHTML = questionSet[count].question;
 
     // create true buttons
     let trueButton = document.createElement('button');
-    trueButton.className = "boolTrue";
-    trueButton.innerText = "true";
+    trueButton.className = "answerButton";
+    trueButton.innerHTML = "true";
 
     // create false button
     let falseButton = document.createElement('button');
-    falseButton.className = "boolFalse";
-    falseButton.innerText = "false";
+    falseButton.className = "answerButton";
+    falseButton.innerHTML = "false";
 
     // append children to parent div
     newDiv.appendChild(newPEl);
@@ -214,22 +213,6 @@ function boolQuestion(count) {
     return newDiv;
 
 }
-
-/**
- * BUGFIX!!!! 
- * So when assigning the answers to the buttons, if the character needed is a special character 
- * the ascii value is produced instead: string looks like this &quot; &#039; etc.
- * 
- * I need to loop through the string and look for these character sequences, then convert from 
- * ASCII to what the user would expect.
- * 
- * Where to call this new function though? probably best to do this before the quiz starts to 
- * ensure no delays on question generation.
- * 
- * so before anything starts, I need to ensure that the information is stored correctly within 
- * the objects
- *  
- */
 
 // function to handle random arrangement of answers
 function assignSortedAnswers(count) {
@@ -252,12 +235,12 @@ function assignSortedAnswers(count) {
 function multiQuestion(count) {
     // create div container for question
     let newDiv = document.createElement('div');
-    newDiv.className = "multiQuestionContainer";
+    newDiv.className = "questionContainer";
 
     // create question p element and append
     let newPEl = document.createElement('p');
-    newPEl.className = "multiQuestionText";
-    newPEl.innerText = questionSet[count].question;
+    newPEl.className = "questionText";
+    newPEl.innerHTML = questionSet[count].question;
     newDiv.appendChild(newPEl);
 
     // sorted answers by alpha
@@ -269,8 +252,8 @@ function multiQuestion(count) {
     for (let i = 0; i < answerArray.length; i++) {
         // create button for each answer and assign
         let newButton = document.createElement('button');
-        newButton.className = "multi-answer";
-        newButton.innerText = answerArray[i];
+        newButton.className = "answerButton";
+        newButton.innerHTML = answerArray[i];
         // store in button array
         buttonArray.push(newButton);
         // append to parent div

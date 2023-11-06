@@ -1,11 +1,45 @@
-:root {
-
-}
-
 body {
     box-sizing: border-box;
-    background: #adadad;
+    background-image: radial-gradient(ellipse at center, #9434DF 50%, #BB88EE 60%, transparent 70%);
+    background-repeat: no-repeat;
     text-align: center;
     padding: 40px;
+    font-size: 2rem;
 }
 
+#start > button {
+    width: 100px;
+    height: 60px;
+    font-size: 1rem;
+}
+
+.questionContainer {
+    width: 90vw;
+    display: grid;
+    grid-template-columns: auto auto auto auto;
+    grid-template-rows: 1fr 2fr 2fr;
+    gap: 10px;
+    font-size: 1rem;
+}
+
+.questionText {
+    grid-column-start: 1;
+    grid-column-end: 5;
+    font-size: 1.5rem;
+}
+
+.answerButton {
+    grid-column: span 2;
+    height: 200px;
+    border: 4px outset gray;
+    border-radius: 40px;
+    font-size: 1.5rem;
+    background-color: #adadad;
+}
+
+.inputInit {
+    width: 300px;
+    height: 40px;
+    font-size: 1rem;
+    text-align: center;
+}
