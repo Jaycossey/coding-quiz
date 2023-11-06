@@ -1,0 +1,29 @@
+body {
+    text-align: center;
+    padding: 40px;
+}
+
+ol {
+    font-size: 20px;
+    text-align: center;
+    padding: 5px;
+    background-color: pink;
+}
+
+ol > li:first-child {
+    background-color: gold;
+}
+
+ol > li:nth-child(2) {
+    background-color: #eee;
+}
+
+ol > li:nth-child(3) {
+    background-color: #EE5816;
+}
+
+li {
+    border: 2px solid gray;
+    height: 40px;
+    margin-top: 5px;
+}

@@ -1,26 +1,30 @@
 // GLOBALS ----------------------------------------------------
+// create variable for element to append to
 let listEl = document.getElementById('listEl');
-
+// create array of objects from local storage
 const highScore = JSON.parse(localStorage.getItem("scores"));
 
+
 // LIST FUNCTIONS ---------------------------------------------
-function createLiElements() {
-    console.log("createEl");
-    appendList();
+// create element function
+function createLiElements(object) {
+    // create new list element
+    let newLiEl = document.createElement('li');
+    // assign text content to element
+    newLiEl.textContent = object.userName + ": " + object.score;
+    // append function call
+    appendList(newLiEl);
 }
 
-function appendList() {
-    console.log("Append function");
+// function to append element to listEl
+function appendList(element) {
+    listEl.appendChild(element);
 }
 
-function sortList() {
-    // console.log("sortList function");
-    console.log("original array:\n", highScore);
+// sort the scores by high to low
+highScore.sort((a, b) => (a.score < b.score) ? 1: -1);
 
-    
-
-
-    createLiElements();
-};
-
-listEl.onload = sortList();
+// for each score, create Element
+highScore.forEach(element => {
+    createLiElements(element);
+});
