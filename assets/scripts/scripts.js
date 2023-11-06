@@ -265,10 +265,13 @@ function multiQuestion(count) {
 
 // manage and add click events to elements
 function manageClickEvents(element) {
-    // console.log(element);
-
+    // add event listener to each button element
     element.addEventListener('click', function(event) {
-        // console.log(event);
+        if (questionCount >= 30) {
+            score += timeRemaining;
+            scorePrompt();
+        }
+        // check answers against target clicked
         checkAnswer(event.target.innerText, questionCount, element);
     });
 }
@@ -293,3 +296,15 @@ function questionTime(count) {
         manageClickEvents(multiQuEl);
     }
 }
+
+
+/**
+ * Current bugs/issues discovered:
+ * 
+ * - If the user completes 30 questions before the end of the timer, then the user would have to wait for timer to finish
+ *          before being able to input their initials for the high score
+ * 
+ * - If the user inputs an incorrect answer, then the timer penalty is not applied, this was a requested feature so will need
+ *          fixing asap
+ * 
+ */
